@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './App.css'
-import { CloudSunRain, MapPinned, Thermometer, Wind, Droplets } from 'lucide-react';
-import Cadastro from './Cadastro'
+import { CloudSunRain, MapPinned, Thermometer, Droplet, Wind } from 'lucide-react';
+
 
 function App() {
   const [cidade, setCidade] = useState('');
@@ -13,7 +13,7 @@ function App() {
   const buscaClima = async () => {
     //validação básica
     if(!cidade.trim()){
-      setErro('Por favor, digite uma cidade');
+      setErro('❗Por favor, digite uma cidade');
       return;
     }
 
@@ -21,12 +21,12 @@ function App() {
     setErro('');
 
     try{
-      const API_KEY = 'bd5e378503939ddaee76f12ad7a97608';
+      const API_KEY = "50878f4678cd0841144b44b2fca0ccc0";
       const url = `https://api.openweathermap.org/data/2.5/weather?q=${cidade}&appid${API_KEY}&units=metric&lang=pt_br`;
       const resposta = await fetch(url);
 
       if(!resposta.ok){
-        throw new Error('Cidade não encontrada');
+        throw new Error('❗Cidade não encontrada');
       }
 
       const dados = await resposta.json();
@@ -63,60 +63,72 @@ function App() {
               <input 
                 type="text" 
                 placeholder="Digite o nome da cidade.." 
+                value={cidade}
+                onChange={(e) => setCidade(e.target.value)}
+                onKeyPress={handleKeyPress}
               />
-              <button>Buscar</button>
+              <button
+                onClick={buscaClima}
+                disabled={carregando}
+              >
+                {carregando ? "Buscando..." : "Buscar"}
+              </button>
             </div>
+            {erro && <div className="error-message">{erro}</div>}
           </div>
 
+          {clima && (<>
           {/* Resultado do Clima */}
           <div id="card-resultado">
             <div id="cidade-info">
               <div id="cidade-nome">
                 <MapPinned style={{color: '#550808ff'}} size={48} />
-                Campinas, BR
+                {clima.name}, {clima.sys.coutry}
               </div>
               <p id="cidade-desc">
-                Nublado
+                {clima.weather[0].description}
               </p>
             </div> {/* Fecha #cidade-desc*/}
 
             {/* Temperatura Principal */}
             <div id="temperatura-box">
               <div id="temperatura-valor">
-                22ºC
+                {Math.round(clima.main.temp)}ºC
               </div>
               <div id="sensacao">
-                Sensação Térmica: 25ºC
+                Sensação Térmica: {Math.round(clima.main.feels_like)}ºC
               </div>
             </div>
 
-<div className="detalhes-box">
+            <div className="detalhes-box">
 
-<div className="detalhes-item">
-<Thermometer />
-<h2>Min/Max</h2>
-<h3>23ºC/26ºC</h3>
-</div>
+              <div className="detalhes-item">
+                <Thermometer style={{color: '#3fb2ffff'}} size={32} />
+                <h2>Min/Max</h2>
+                <h3>{Math.round(clima.main.temp_min)}ºC / {Math.round(clima.main.temp_max)}ºC</h3>
+              </div>
 
-<div className="detalhes-item">
-<Droplets />
-<h2>Umidade</h2>
-<h3>10%</h3>
-</div>
+              <div className="detalhes-item">
+                <Droplet style={{color: '#3fb2ffff'}} size={32} />
+                <h2>Umidade</h2>
+                <h3>{clima.main.humidity}%</h3>
+              </div>
 
-<div className="detalhes-item">
-<Wind />
-<h2>Vento</h2>
-<h3>15 km/h</h3>
-</div>
+              <div className="detalhes-item">
+                <Wind style={{color: '#3fb2ffff'}} size={32} />
+                <h2>Vento</h2>
+                <h3>{Math.round(clima.wind.speed*3.6)} km/h</h3>
+              </div>
 
-</div>{/* fecha detalhes box */}
-
+            </div>{/* Fecha detalhes-box */}
+          
 
           </div> {/* Fecha #card-resultado */}
+          </>)}
 
         </div>
       </div>
+          
     </>
   )
 }
